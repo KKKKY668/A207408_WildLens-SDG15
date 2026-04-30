@@ -42,16 +42,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // 使用自定义主题包裹全 App，确保字体和配色方案生效
+           //新增这个多页面
             WildLensTheme {
-                WildLensApp()
+                WildLensNavHost()
             }
         }
     }
 }
 
 @Composable
-fun WildLensApp() {
+fun WildLensApp(
+    //页面跳转参数，以及用了viewmodel（ui和数据分离）
+    viewModel: WildLensViewModel,
+    onProfileClick: () -> Unit,
+    onMenuClick: () -> Unit,
+    onIdentifyClick: () -> Unit,
+    onActivityClick: () -> Unit
+) {
     var selectedTab by remember { mutableStateOf(1) }
     var searchInput by remember { mutableStateOf("") }
     var confirmedSearch by remember { mutableStateOf("") }
@@ -62,7 +69,16 @@ fun WildLensApp() {
         bottomBar = {
             WildLensBottomNav(
                 selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
+                onTabSelected = { index ->
+                   //控制跳转，之前是选中有显示
+                    when (index) {
+                        0 -> onMenuClick()
+                        2 -> onIdentifyClick()
+                        3 -> onProfileClick()
+                        4 -> onActivityClick()
+                        else -> selectedTab = index
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -111,15 +127,14 @@ fun WildLensApp() {
 // Task 2 & 3
 @Composable
 fun GridCard(item: GridItem) {
-    // 状态：用于控制卡片是否展开
     var expanded by remember { mutableStateOf(false) }
 
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp) // 外边距，防止卡片挨得太紧
+            .padding(8.dp)
             .clickable { expanded = !expanded }
-            .animateContentSize(), // 变化时改变尺寸
+            .animateContentSize(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -173,7 +188,8 @@ fun GridCard(item: GridItem) {
 
                 // 动画逻辑如果展开就展示
                 if (expanded) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp)
+                        .offset(y = (-60).dp))
                     Text(
                         text = "This species is vital for SDG 15: Life on Land. Protecting biodiversity ensures a balanced ecosystem. 🌿",
                         // 自动应用 Ubuntu 字体样式
