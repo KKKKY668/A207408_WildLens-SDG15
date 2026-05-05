@@ -96,15 +96,7 @@ fun WildLensApp(
             )
 
             if (confirmedSearch.isNotEmpty()) {
-                // 有内容：显示 WelcomeBanner
                 WelcomeBanner(name = confirmedSearch)
-            } else {
-                // 为空：显示 Default text
-                Text(
-                    text = "Please enter your name to search.",
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.outline
-                )
             }
 
 
