@@ -41,7 +41,8 @@ fun WildLensNavHost() {
         }
 
         composable(Routes.IDENTIFY) {
-            IdentifyScreen(onBack = { navController.popBackStack() })
+            // 修改这里：传入 viewModel
+            IdentifyScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
         }
 
         composable(Routes.ACTIVITY) {

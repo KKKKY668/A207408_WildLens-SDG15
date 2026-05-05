@@ -13,12 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.a207408_cikguizwan_lab02.ui.theme.WildLensTheme
 
-data class ActivityLog(
-    val species: String,
-    val location: String,
-    val time: String,
-    val imageRes: Int
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,14 +20,10 @@ fun ActivityScreen(viewModel: WildLensViewModel, onBack: () -> Unit) {
 
     val profile by viewModel.userProfile.collectAsState()
 
-    val logs = listOf(
-        ActivityLog("Malayan Tiger", "Taman Negara", "Today, 9:14 AM", R.drawable.img_tiger),
-        ActivityLog("Hornbill", "Fraser's Hill", "Today, 8:02 AM", R.drawable.img_hornbill),
-        ActivityLog("Rafflesia", "Cameron Highlands", "Yesterday, 3:45 PM", R.drawable.img_rafflesia),
-        ActivityLog("Sun Bear", "Borneo Reserve", "Yesterday, 11:20 AM", R.drawable.img_bear),
-        ActivityLog("Butterflies", "Penang Hill", "2 days ago, 2:30 PM", R.drawable.img_butterfly),
-        ActivityLog("Little Heron", "Putrajaya Wetlands", "3 days ago, 7:10 AM", R.drawable.img_heron),
-    )
+    // ★ 核心修改：动态获取 ViewModel 里的列表
+    val logs by viewModel.activityLogs.collectAsState()
+
+    // 注意：一定要把你原本写在这里的 val logs = listOf(...) 删掉！
 
     WildLensTheme {
         Scaffold(

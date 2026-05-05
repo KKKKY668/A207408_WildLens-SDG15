@@ -96,8 +96,17 @@ fun WildLensApp(
             )
 
             if (confirmedSearch.isNotEmpty()) {
+                // 有内容：显示 WelcomeBanner
                 WelcomeBanner(name = confirmedSearch)
+            } else {
+                // 为空：显示 Default text
+                Text(
+                    text = "Please enter your name to search.",
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
             }
+
 
             ObservationBanner(count = 94)
 
@@ -105,9 +114,9 @@ fun WildLensApp(
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(12.dp), // 增加间距使卡片更美观
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                      contentPadding = PaddingValues(12.dp), // 增加间距使卡片更美观
+                      verticalArrangement = Arrangement.spacedBy(12.dp),
+                      horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(sampleGridItems()) { item -> GridCard(item = item) }
                 }
@@ -177,11 +186,10 @@ fun GridCard(item: GridItem) {
                 }
             }
 
-            // 卡片文字部分
-            Column(modifier = Modifier.padding(12.dp)) {
+            // 卡片文字部分 这里
+            Column(modifier = Modifier.padding(12.dp))  {
                 Text(
                     text = item.name,
-                    // 字体自动应用
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -214,8 +222,8 @@ fun SearchInputRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface) // 使用主题背景
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+                 .padding(horizontal = 12.dp, vertical = 8.dp), // 这里
+                verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         OutlinedTextField(
@@ -260,7 +268,7 @@ fun WelcomeBanner(name: String) {
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(20.dp)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+           Spacer(modifier = Modifier.width(8.dp))// 这里
         Text(
             text = "Welcome back, $name! 🌿",
             style = MaterialTheme.typography.titleMedium,
@@ -278,7 +286,8 @@ fun WildLensTopBar() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        // 这里
+        Column (verticalArrangement = Arrangement.spacedBy(4.dp)){
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(painter = painterResource(id = R.drawable.ic_shield), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))

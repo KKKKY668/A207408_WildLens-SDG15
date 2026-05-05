@@ -8,19 +8,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.a207408_cikguizwan_lab02.ui.theme.WildLensTheme
-import kotlinx.coroutines.delay   // 【新增】导入 delay
-import kotlinx.coroutines.launch  // 【新增】导入 launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IdentifyScreen(onBack: () -> Unit) {
+fun IdentifyScreen(viewModel: WildLensViewModel, onBack: () -> Unit) {
     var identified by remember { mutableStateOf(false) }
     var isScanning by remember { mutableStateOf(false) }
+
+    // ★ 优化2：用于页面动态展示随机出来的识别结果
+    var currentSpecies by remember { mutableStateOf("Malayan Tiger") }
+    var currentImage by remember { mutableIntStateOf(R.drawable.img_tiger) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -76,14 +81,15 @@ fun IdentifyScreen(onBack: () -> Unit) {
                                 modifier = Modifier.padding(16.dp)
                             ) {
                                 Text("✅", style = MaterialTheme.typography.displaySmall)
+                                // 动态显示随机出来的名字
                                 Text(
-                                    "Malayan Tiger",
+                                    text = currentSpecies,
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    "Panthera tigris jacksoni",
+                                    "Identified via WildLens AI",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.secondary
                                 )
@@ -92,7 +98,7 @@ fun IdentifyScreen(onBack: () -> Unit) {
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
-                                        "Critically Endangered",
+                                        "Protected Species", // 稍微泛化一点的标签，适应所有动物
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onErrorContainer,
@@ -126,7 +132,8 @@ fun IdentifyScreen(onBack: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(72.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape),
+                        // 扫描时按钮底色变灰，提示用户无法点击
+                        .background(if (isScanning) Color.Gray else MaterialTheme.colorScheme.primary, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
@@ -134,19 +141,44 @@ fun IdentifyScreen(onBack: () -> Unit) {
                             identified = false
                             isScanning = true
 
-
                             coroutineScope.launch {
                                 delay(1500) // 模拟 1.5 秒的扫描延迟
+
+                                // ★ 优化2：题库，每次扫描随机出一个动物
+                                val randomData = listOf(
+                                    Pair("Malayan Tiger", R.drawable.img_tiger),
+                                    Pair("Hornbill", R.drawable.img_hornbill),
+                                    Pair("Rafflesia", R.drawable.img_rafflesia),
+                                    Pair("Sun Bear", R.drawable.img_bear)
+                                ).random()
+
+                                // 更新 UI 显示状态
+                                currentSpecies = randomData.first
+                                currentImage = randomData.second
+
                                 isScanning = false
                                 identified = true
+
+                                // ★ 核心逻辑：存入 ViewModel 以供 ActivityScreen 显示
+                                val currentLocation = viewModel.userProfile.value.location.ifBlank { "Nearby" }
+                                viewModel.addActivityLog(
+                                    ActivityLog(
+                                        species = currentSpecies,
+                                        location = currentLocation,
+                                        time = "Just now",
+                                        imageRes = currentImage
+                                    )
+                                )
                             }
                         },
+                        // ★ 优化1：防狂点设计，扫描中直接禁用按钮
+                        enabled = !isScanning,
                         modifier = Modifier.size(72.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_camera),
                             contentDescription = "Identify",
-                            tint = androidx.compose.ui.graphics.Color.White,
+                            tint = Color.White,
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -166,14 +198,25 @@ fun IdentifyScreen(onBack: () -> Unit) {
                             )
                         }
                     }
+
+                    // ★ 优化3：成功添加的交互提示
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "✔ Successfully added to Activity Log",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color(0xFF4CAF50), // 环保绿色
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                Text(
-                    text = "Tap the button to identify a nearby species",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary,
-                    textAlign = TextAlign.Center
-                )
+                if (!identified && !isScanning) {
+                    Text(
+                        text = "Tap the button to identify a nearby species",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
